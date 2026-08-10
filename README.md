@@ -1,4 +1,4 @@
-# System Monitor
+#   Monitor
 
 A bar widget that displays live CPU and RAM usage, with a detailed floating panel showing CPU, RAM, Disk, Network, and GPU monitoring.
 
