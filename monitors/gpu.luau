@@ -4,6 +4,7 @@
 local MAX_SAMPLES = 60
 
 local history = {}
+local tempHistory = {}
 local usagePercent = 0
 local tempC = nil
 local vramUsedBytes = nil
@@ -35,7 +36,10 @@ function M.getValue()
 end
 
 function M.getSubtitle()
-  return ""
+  if tempC == nil then
+    return ""
+  end
+  return string.format("%d°C", tempC)
 end
 
 function M.tick()
@@ -48,8 +52,10 @@ function M.tick()
   vramUsedBytes = s.gpu.vramUsedBytes
   vramTotalBytes = s.gpu.vramTotalBytes
   table.insert(history, usagePercent / 100)
+  table.insert(tempHistory, tempC ~= nil and tempC / 100 or 0)
   if #history > MAX_SAMPLES then
     table.remove(history, 1)
+    table.remove(tempHistory, 1)
   end
 end
 
@@ -83,6 +89,8 @@ local function buildGraph()
         ui.graph({
           values = { table.unpack(history) },
           color = "secondary",
+          values2 = { table.unpack(tempHistory) },
+          color2 = "error",
           lineWidth = 2,
           flexGrow = 1,
         }),
@@ -116,7 +124,7 @@ local function buildStatsPanel()
       ui.label({ text = s.value, fontSize = 12, fontWeight = s.highlight and "bold" or nil, color = valColor }),
     }))
   end
-    ui.column({
+  return ui.column({
     fill = "surface_variant/0.6",
     radius = 8,
     padding = 12,
@@ -129,13 +137,17 @@ local function buildStatsPanel()
 end
 
 function M.build()
+  local headerValue = string.format("%d%%", usagePercent)
+  if tempC ~= nil then
+    headerValue = headerValue .. string.format(" · %d°C", tempC)
+  end
   return ui.column({ flexGrow = 1, gap = 0 }, {
     ui.row({ padding = 12, align = "center", justify = "space_between" }, {
       ui.column({ gap = 2 }, {
         ui.label({ text = "GPU", fontSize = 18, fontWeight = "bold" }),
         ui.label({ text = "Utilization over 1 minute", fontSize = 11, color = "on_surface_variant" }),
       }),
-      ui.label({ text = string.format("%d%%", usagePercent), fontSize = 18, fontWeight = "bold", color = "secondary" }),
+      ui.label({ text = headerValue, fontSize = 18, fontWeight = "bold", color = "secondary" }),
     }),
     ui.row({ flexGrow = 1, gap = 12, padding = { left = 12, right = 12, bottom = 12 }, align = "stretch" }, {
       ui.column({ flexGrow = 1, gap = 0 }, {

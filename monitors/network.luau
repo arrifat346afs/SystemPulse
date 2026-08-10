@@ -7,6 +7,7 @@ local rxHistory = {}
 local txHistory = {}
 local rxBytesPerSec = 0
 local txBytesPerSec = 0
+local maxThroughput = 1
 local interfaces = {}
 local refresh = nil
 
@@ -22,7 +23,7 @@ function M.getPreview()
   end
   local combined = {}
   for i = 1, #rxHistory do
-    combined[i] = (rxHistory[i] + txHistory[i]) / 2
+    combined[i] = math.max(rxHistory[i], txHistory[i]) / maxThroughput
   end
   return { values = { table.unpack(combined) }, color = "error" }
 end
@@ -35,7 +36,10 @@ function M.getValue()
 end
 
 function M.getSubtitle()
-  return ""
+  if rxBytesPerSec == 0 and txBytesPerSec == 0 then
+    return ""
+  end
+  return string.format("↓%s ↑%s", formatSpeed(rxBytesPerSec), formatSpeed(txBytesPerSec))
 end
 
 function M.tick()
@@ -51,6 +55,14 @@ function M.tick()
   if #rxHistory > MAX_SAMPLES then
     table.remove(rxHistory, 1)
     table.remove(txHistory, 1)
+  end
+  local currentMax = math.max(rxBytesPerSec, txBytesPerSec)
+  if currentMax > maxThroughput then
+    maxThroughput = currentMax
+  end
+  maxThroughput = maxThroughput * 0.9
+  if maxThroughput < 1024 then
+    maxThroughput = 1024
   end
 end
 
@@ -77,24 +89,30 @@ local function formatBytes(bytes)
 end
 
 local function buildYLabels()
-  return ui.column({ justify = "space_between", width = 40 }, {
-    ui.label({ text = "100%", fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "75%", fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "50%", fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "25%", fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "0%", fontSize = 10, color = "on_surface_variant" }),
+  return ui.column({ justify = "space_between", width = 60 }, {
+    ui.label({ text = formatSpeed(maxThroughput), fontSize = 10, color = "on_surface_variant" }),
+    ui.label({ text = formatSpeed(maxThroughput * 0.75), fontSize = 10, color = "on_surface_variant" }),
+    ui.label({ text = formatSpeed(maxThroughput * 0.5), fontSize = 10, color = "on_surface_variant" }),
+    ui.label({ text = formatSpeed(maxThroughput * 0.25), fontSize = 10, color = "on_surface_variant" }),
+    ui.label({ text = "0 B/s", fontSize = 10, color = "on_surface_variant" }),
   })
 end
 
 local function buildGraph()
+  local normalizedRx = {}
+  local normalizedTx = {}
+  for i = 1, #rxHistory do
+    normalizedRx[i] = rxHistory[i] / maxThroughput
+    normalizedTx[i] = txHistory[i] / maxThroughput
+  end
   return ui.column({ flexGrow = 1, gap = 4 }, {
     ui.row({ gap = 8, align = "stretch", flexGrow = 1 }, {
       buildYLabels(),
       ui.column({ flexGrow = 1, gap = 4 }, {
         ui.graph({
-          values = { table.unpack(rxHistory) },
+          values = normalizedRx,
           color = "error",
-          values2 = { table.unpack(txHistory) },
+          values2 = normalizedTx,
           color2 = "tertiary",
           lineWidth = 2,
           flexGrow = 1,
@@ -115,15 +133,15 @@ local function buildStatsPanel()
   for _, v in ipairs(txHistory) do totalTx = totalTx + v end
 
   local stats = {
-    { label = "Receive", value = formatSpeed(rxBytesPerSec), highlight = true },
-    { label = "Send", value = formatSpeed(txBytesPerSec), highlight = true },
+    { label = "↓ Download", value = formatSpeed(rxBytesPerSec), highlight = true, color = "error" },
+    { label = "↑ Upload", value = formatSpeed(txBytesPerSec), highlight = true, color = "tertiary" },
     { label = "Total Received", value = formatBytes(totalRx) },
     { label = "Total Sent", value = formatBytes(totalTx) },
   }
 
   local rows = {}
   for _, s in ipairs(stats) do
-    local valColor = s.highlight and "error" or nil
+    local valColor = s.color or (s.highlight and "error" or nil)
     table.insert(rows, ui.row({ justify = "space_between" }, {
       ui.label({ text = s.label, fontSize = 12, color = "on_surface_variant" }),
       ui.label({ text = s.value, fontSize = 12, fontWeight = s.highlight and "bold" or nil, color = valColor }),
@@ -159,6 +177,7 @@ function M.build()
         ui.label({ text = "Network", fontSize = 18, fontWeight = "bold" }),
         ui.label({ text = "Throughput over 1 minute", fontSize = 11, color = "on_surface_variant" }),
       }),
+      ui.label({ text = formatSpeed(maxThroughput), fontSize = 14, color = "on_surface_variant" }),
     }),
     ui.row({ flexGrow = 1, gap = 12, padding = { left = 12, right = 12, bottom = 12 }, align = "stretch" }, {
       ui.column({ flexGrow = 1, gap = 0 }, {
