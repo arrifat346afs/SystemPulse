@@ -162,7 +162,7 @@ end
 
 function M.build()
   return ui.column({ flexGrow = 1, gap = 0 }, {
-    ui.row({ padding = 12, align = "center", justify = "space_between" }, {
+    ui.row({ padding = { left = 12, right = 12, top = 12, bottom = 4 }, align = "center", justify = "space_between" }, {
       ui.column({ gap = 2 }, {
         ui.label({ text = "CPU", fontSize = 18, fontWeight = "bold" }),
         ui.label({ text = "Utilization over 1 minute", fontSize = 11, color = "on_surface_variant" }),
@@ -170,8 +170,10 @@ function M.build()
       ui.label({ text = string.format("%d%%", usage), fontSize = 18, fontWeight = "bold", color = "primary" }),
     }),
     ui.row({ flexGrow = 1, gap = 12, padding = { left = 12, right = 12, bottom = 12 }, align = "stretch" }, {
-      ui.column({ flexGrow = 1, gap = 0 }, {
-        buildGraph(),
+      ui.column({ flexGrow = 1, gap = 8 }, {
+        ui.column({ fill = "surface_variant/0.4", radius = 10, border = "outline/0.2", borderWidth = 1, padding = 12, flexGrow = 1 }, {
+          buildGraph(),
+        }),
       }),
       buildStatsPanel(),
     }),

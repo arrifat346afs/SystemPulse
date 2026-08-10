@@ -127,7 +127,9 @@ function M.build()
     }),
     ui.row({ flexGrow = 1, gap = 12, padding = { left = 12, right = 12, bottom = 12 }, align = "stretch" }, {
       ui.column({ flexGrow = 1, gap = 0 }, {
-        buildGraph(),
+        ui.column({ fill = "surface_variant/0.4", radius = 10, border = "outline/0.2", borderWidth = 1, padding = 12, flexGrow = 1 }, {
+          buildGraph(),
+        }),
       }),
       buildStatsPanel(),
     }),

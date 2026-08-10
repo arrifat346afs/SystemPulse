@@ -6,6 +6,7 @@ local ram = require("./monitors/ram.luau")
 local disk = require("./monitors/disk.luau")
 local network = require("./monitors/network.luau")
 local gpu = require("./monitors/gpu.luau")
+local system = require("./monitors/system.luau")
 
 local monitors = {
   cpu = cpu,
@@ -13,6 +14,7 @@ local monitors = {
   disk = disk,
   network = network,
   gpu = gpu,
+  system = system,
 }
 
 local tab = "cpu"
@@ -24,6 +26,7 @@ local deviceColors = {
   disk = "secondary",
   network = "error",
   gpu = "secondary",
+  system = "on_surface_variant",
 }
 
 local function sidebarItem(id, label, subtitle, value, module)
@@ -38,22 +41,26 @@ local function sidebarItem(id, label, subtitle, value, module)
 
   local graphElement = nil
   if preview and #preview.values > 0 then
-    graphElement = ui.graph({
-      values = preview.values,
-      color = color,
-      height = 50,
-      lineWidth = 1.5,
-      border = "outline/0.3",
-      radius = 4,
+    graphElement = ui.column({ height = 50, border = "outline/0.3", radius = 4 }, {
+      ui.graph({
+        values = preview.values,
+        color = color,
+        height = 50,
+        lineWidth = 1.5,
+        flexGrow = 1,
+      }),
     })
   else
-    graphElement = ui.box({ height = 50, border = "outline/0.3", radius = 4 })
+    graphElement = ui.column({ height = 50, border = "outline/0.3", radius = 4 })
   end
 
   return ui.column({
     key = id,
     opacity = isSelected and 1.0 or 0.5,
-    radius = 8,
+    fill = "surface_variant/0.4",
+    radius = 10,
+    border = "outline/0.2",
+    borderWidth = 1,
     padding = { left = 8, right = 2, top = 6, bottom = 6 },
     gap = 0,
     onClick = onClick,
@@ -117,12 +124,13 @@ local function buildSidebar()
     sidebarItem("disk", "Disk", disk.getSubtitle and disk.getSubtitle() or "", diskVal, disk),
     sidebarItem("network", "Network", network.getSubtitle and network.getSubtitle() or "", netVal, network),
     sidebarItem("gpu", "GPU", gpu.getSubtitle and gpu.getSubtitle() or "", gpuVal, gpu),
+    sidebarItem("system", "System", "System Info", "", system),
     ui.column({ gap = 4 }, appItems),
   })
 end
 
 local function buildPerformanceView()
-  return ui.row({ flexGrow = 1, gap = 0, align = "stretch" }, {
+  return ui.row({ flexGrow = 1, gap = 12, align = "stretch" }, {
     buildSidebar(),
     ui.column({ flexGrow = 1, gap = 0 }, {
       monitors[tab].build(),
@@ -131,11 +139,12 @@ local function buildPerformanceView()
 end
 
 function render()
-  panel.render(ui.column({ flexGrow = 1, gap = 0 , padding ={buttom = 20}}, {
+  panel.render(ui.column({ flexGrow = 1, gap = 0, padding = { bottom = 20 } }, {
     ui.row({ align = "center", justify = "space_between", padding = { left = 12, right = 12, top = 8, bottom = 10 } }, {
       ui.label({ text = "System Monitor", fontSize = 16, fontWeight = "bold" }),
       ui.button({ glyph = "close", onClick = "onCloseClicked" }),
     }),
+    ui.separator({ spacing = 12 }),
     buildPerformanceView(),
   }))
 end
