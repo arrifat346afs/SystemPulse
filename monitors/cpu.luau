@@ -1,11 +1,11 @@
 --!nonstrict
--- CPU monitor detail view: overall usage graph, temperature / frequency / load
--- readouts, and an optional per-core usage list.
+-- CPU monitor detail view: Mission Center style with full-width graph and stats panel.
 
 local MAX_SAMPLES = 60
 
 local history = {}
 local tempHistory = {}
+local coreHistories = {}
 local usage = 0
 local temp = nil
 local freq = nil
@@ -22,6 +22,27 @@ local M = {}
 function M.attach(fn)
   refresh = fn
   noctalia.setUpdateInterval(1000)
+end
+
+function M.getPreview()
+  if #history == 0 then
+    return nil
+  end
+  return { values = { table.unpack(history) }, color = "primary" }
+end
+
+function M.getValue()
+  if usage == 0 then
+    return "—"
+  end
+  return string.format("%d%%", usage)
+end
+
+function M.getSubtitle()
+  if temp == nil then
+    return ""
+  end
+  return string.format("%d°C", temp)
 end
 
 function M.tick()
@@ -51,6 +72,17 @@ function M.tick()
 
   if showCores then
     cores = noctalia.cpuCores()
+    if cores ~= nil then
+      for i = 1, #cores do
+        if coreHistories[i] == nil then
+          coreHistories[i] = {}
+        end
+        table.insert(coreHistories[i], (cores[i] or 0) / 100)
+        if #coreHistories[i] > MAX_SAMPLES then
+          table.remove(coreHistories[i], 1)
+        end
+      end
+    end
   end
 end
 
@@ -61,61 +93,20 @@ local function formatGhz(mhz)
   return string.format("%.1f GHz", mhz / 1000)
 end
 
-local function statCard(label, value)
-  return ui.column({ flexGrow = 1, gap = 2 }, {
-    ui.label({ text = label, fontSize = 12, color = "on_surface_variant" }),
-    ui.label({ text = value, fontWeight = "bold" }),
+local function buildYLabels()
+  return ui.column({ justify = "space_between", width = 40 }, {
+    ui.label({ text = "100%", fontSize = 10, color = "on_surface_variant" }),
+    ui.label({ text = "75%", fontSize = 10, color = "on_surface_variant" }),
+    ui.label({ text = "50%", fontSize = 10, color = "on_surface_variant" }),
+    ui.label({ text = "25%", fontSize = 10, color = "on_surface_variant" }),
+    ui.label({ text = "0%", fontSize = 10, color = "on_surface_variant" }),
   })
 end
 
-local function buildCores()
-  if cores == nil or #cores == 0 then
-    return ui.label({ text = "Sampling…", color = "on_surface_variant" })
-  end
-
-  local rows = {}
-  for i, pct in ipairs(cores) do
-    table.insert(rows, ui.row({ gap = 8, align = "center" }, {
-      ui.label({ text = string.format("Core %d", i), width = 56 }),
-      ui.progress({ progress = (pct or 0) / 100, flexGrow = 1 }),
-      ui.label({ text = string.format("%d%%", math.floor(pct or 0)), width = 40, textAlign = "end" }),
-    }))
-  end
-
-  return ui.scroll({ flexGrow = 1, gap = 6 }, rows)
-end
-
-local function getUsageColor()
-  return "primary"
-end
-
-function M.build()
-  local loadText = "—"
-  if load ~= nil and #load >= 3 then
-    loadText = string.format("%.1f / %.1f / %.1f", load[1], load[2], load[3])
-  end
-
-  local freqText = formatGhz(freq)
-  if freq ~= nil and maxFreq ~= nil then
-    freqText = freqText .. " / " .. formatGhz(maxFreq)
-  end
-
-  local children = {
-    ui.row({ gap = 24, align = "center" }, {
-      ui.label({ text = string.format("%d%%", usage), fontSize = 32, fontWeight = "bold", color = "primary" }),
-      ui.column({ flexGrow = 1, gap = 2 }, {
-        ui.label({ text = "CPU Usage", fontSize = 12, color = "on_surface_variant" }),
-        ui.label({ text = "Overall utilisation across all cores", color = "on_surface_variant" }),
-      }),
-    }),
-    ui.row({ gap = 8, align = "stretch" }, {
-      ui.column({ justify = "space_between", width = 36, gap = 0 }, {
-        ui.label({ text = "100%", fontSize = 10, color = "primary" }),
-        ui.label({ text = "75%", fontSize = 10, color = "primary" }),
-        ui.label({ text = "50%", fontSize = 10, color = "primary" }),
-        ui.label({ text = "25%", fontSize = 10, color = "primary" }),
-        ui.label({ text = "0%", fontSize = 10, color = "primary" }),
-      }),
+local function buildGraph()
+  return ui.column({ flexGrow = 1, gap = 4 }, {
+    ui.row({ gap = 8, align = "stretch", flexGrow = 1 }, {
+      buildYLabels(),
       ui.column({ flexGrow = 1, gap = 4 }, {
         ui.graph({
           values = { table.unpack(history) },
@@ -123,46 +114,68 @@ function M.build()
           values2 = { table.unpack(tempHistory) },
           color2 = "error",
           lineWidth = 2,
-          height = 700,
+          flexGrow = 1,
         }),
         ui.row({ justify = "space_between" }, {
-          ui.label({ text = "60s ago", fontSize = 10, color = "outline" }),
-          ui.label({ text = "now", fontSize = 10, color = "outline" }),
+          ui.label({ text = "Utilization over 1 minute", fontSize = 10, color = "on_surface_variant" }),
+          ui.label({ text = "100%", fontSize = 10, color = "on_surface_variant" }),
         }),
       }),
     }),
-    ui.row({ gap = 24, align = "center" }, {
-      ui.label({
-        text = string.format("Min: %d%%  Max: %d%%", minUsage, maxUsage),
-        fontSize = 12,
-        color = "on_surface_variant"
-      }),
-    }),
-    ui.row({ gap = 12, align = "stretch" }, {
-      statCard("Temperature", temp ~= nil and string.format("%.0f°C", temp) or "—"),
-      statCard("Frequency", freqText),
-      statCard("Load (1m / 5m / 15m)", loadText),
-    }),
-    ui.row({ gap = 12, align = "center" }, {
-      ui.toggle({
-        checked = showCores,
-        onChange = function(value)
-          showCores = value == "true"
-          if showCores then
-            cores = noctalia.cpuCores()
-          end
-          if refresh then refresh() end
-        end,
-      }),
-      ui.label({ text = "Show per-core usage", flexGrow = 1 }),
-    }),
+  })
+end
+
+local function buildStatsPanel()
+  local stats = {
+    { label = "Utilization", value = string.format("%d%%", usage), highlight = true },
+    { label = "Temperature", value = temp ~= nil and string.format("%d°C", temp) or "—" },
+    { label = "Frequency", value = formatGhz(freq) },
+    { label = "Max Frequency", value = formatGhz(maxFreq) },
   }
-
-  if showCores then
-    table.insert(children, buildCores())
+  if load ~= nil and #load >= 3 then
+    table.insert(stats, { label = "Load (1m)", value = string.format("%.2f", load[1]) })
+    table.insert(stats, { label = "Load (5m)", value = string.format("%.2f", load[2]) })
+    table.insert(stats, { label = "Load (15m)", value = string.format("%.2f", load[3]) })
   end
+  table.insert(stats, { label = "Min Usage", value = string.format("%d%%", minUsage) })
+  table.insert(stats, { label = "Max Usage", value = string.format("%d%%", maxUsage) })
 
-  return ui.column({ flexGrow = 1, gap = 12 }, children)
+  local rows = {}
+  for _, s in ipairs(stats) do
+    local valColor = s.highlight and "primary" or nil
+    table.insert(rows, ui.row({ justify = "space_between" }, {
+      ui.label({ text = s.label, fontSize = 12, color = "on_surface_variant" }),
+      ui.label({ text = s.value, fontSize = 12, fontWeight = s.highlight and "bold" or nil, color = valColor }),
+    }))
+  end
+  return ui.column({
+    fill = "surface_variant/0.6",
+    radius = 8,
+    padding = 12,
+    gap = 6,
+    width = 180,
+  }, {
+    ui.label({ text = "Statistics", fontSize = 12, fontWeight = "bold" }),
+    ui.column({ gap = 4 }, rows),
+  })
+end
+
+function M.build()
+  return ui.column({ flexGrow = 1, gap = 0 }, {
+    ui.row({ padding = 12, align = "center", justify = "space_between" }, {
+      ui.column({ gap = 2 }, {
+        ui.label({ text = "CPU", fontSize = 18, fontWeight = "bold" }),
+        ui.label({ text = "Utilization over 1 minute", fontSize = 11, color = "on_surface_variant" }),
+      }),
+      ui.label({ text = string.format("%d%%", usage), fontSize = 18, fontWeight = "bold", color = "primary" }),
+    }),
+    ui.row({ flexGrow = 1, gap = 12, padding = { left = 12, right = 12, bottom = 12 }, align = "stretch" }, {
+      ui.column({ flexGrow = 1, gap = 0 }, {
+        buildGraph(),
+      }),
+      buildStatsPanel(),
+    }),
+  })
 end
 
 return M

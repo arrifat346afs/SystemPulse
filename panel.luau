@@ -1,7 +1,6 @@
 --!nonstrict
--- A Task Manager style panel: a sidebar of category tabs on the left, and the
--- selected category's detail view on the right. Each monitor's detail view
--- lives in its own module under monitors/ (see require below).
+-- Mission Center style system monitor panel: sidebar with device cards,
+-- main area with full-width graphs and stats.
 
 local cpu = require("./monitors/cpu.luau")
 local ram = require("./monitors/ram.luau")
@@ -19,30 +18,71 @@ local monitors = {
 
 local tab = "cpu"
 
-local function setTab(name)
-  tab = name
-  render()
-end
+local deviceColors = {
+  cpu = "primary",
+  ram = "tertiary",
+  disk = "secondary",
+  network = "error",
+  gpu = "secondary",
+}
 
-local function sidebarItem(id, label, glyph)
-  return ui.button({
+local function sidebarItem(id, label, subtitle, value, module)
+  local color = deviceColors[id] or "primary"
+  local preview = module and module.getPreview and module.getPreview() or nil
+  local isSelected = tab == id
+
+  local function onClick()
+    tab = id
+    render()
+  end
+
+  local graphElement = nil
+  if preview and #preview.values > 0 then
+    graphElement = ui.graph({
+      values = preview.values,
+      color = color,
+      height = 50,
+      lineWidth = 1.5,
+    })
+  else
+    graphElement = ui.box({ height = 50 })
+  end
+
+  return ui.column({
     key = id,
-    text = label,
-    glyph = glyph,
-    variant = "ghost",
-    selected = tab == id,
-    contentAlign = "start",
-    onClick = function() setTab(id) end,
+    opacity = isSelected and 1.0 or 0.5,
+    radius = 8,
+    padding = { left = 8, right = 8, top = 6, bottom = 6 },
+    gap = 0,
+    onClick = onClick,
+  }, {
+    ui.row({ gap = 8, align = "center" }, {
+      ui.column({ width = 55 }, {
+        graphElement,
+      }),
+      ui.column({ flexGrow = 1, gap = 2 }, {
+        ui.label({ text = label, fontSize = 13, fontWeight = "bold" }),
+        ui.label({ text = subtitle, fontSize = 10, color = "on_surface_variant" }),
+        ui.label({ text = value, fontSize = 11, color = color }),
+      }),
+    }),
   })
 end
 
 local function buildSidebar()
-  return ui.column({ width = 160, gap = 4 }, {
-    sidebarItem("cpu", "CPU", "cpu"),
-    sidebarItem("ram", "RAM", "memory"),
-    sidebarItem("disk", "Disk (SSD)", "database"),
-    sidebarItem("network", "Network", "network"),
-    sidebarItem("gpu", "GPU", "device-desktop"),
+  local cpuVal = cpu.getValue and cpu.getValue() or "—"
+  local ramVal = ram.getValue and ram.getValue() or "—"
+  local diskVal = disk.getValue and disk.getValue() or "—"
+  local netVal = network.getValue and network.getValue() or "—"
+  local gpuVal = gpu.getValue and gpu.getValue() or "—"
+
+  return ui.column({ width = 220, gap = 8 }, {
+    ui.label({ text = "Devices", fontSize = 14, fontWeight = "bold" }),
+    sidebarItem("cpu", "CPU", cpu.getSubtitle and cpu.getSubtitle() or "", cpuVal, cpu),
+    sidebarItem("ram", "Memory", ram.getSubtitle and ram.getSubtitle() or "", ramVal, ram),
+    sidebarItem("disk", "Disk", disk.getSubtitle and disk.getSubtitle() or "", diskVal, disk),
+    sidebarItem("network", "Network", network.getSubtitle and network.getSubtitle() or "", netVal, network),
+    sidebarItem("gpu", "GPU", gpu.getSubtitle and gpu.getSubtitle() or "", gpuVal, gpu),
   })
 end
 
@@ -52,15 +92,17 @@ local function buildMain()
   })
 end
 
-local function render()
-  panel.render(ui.column({ flexGrow = 1, gap = 12 }, {
-    ui.row({ align = "center", justify = "space_between", gap = 8 }, {
-      ui.label({ text = "System Monitor", fontSize = 16, fontWeight = "bold", flexGrow = 1 }),
+function render()
+  panel.render(ui.column({ flexGrow = 1, gap = 0 }, {
+    ui.row({ align = "center", justify = "space_between", padding = { left = 12, right = 12, top = 8, bottom = 8 } }, {
+      ui.label({ text = "System Monitor", fontSize = 16, fontWeight = "bold" }),
       ui.button({ glyph = "close", onClick = "onCloseClicked" }),
     }),
-    ui.row({ flexGrow = 1, gap = 8, align = "stretch" }, {
+    ui.row({ flexGrow = 1, gap = 0, align = "stretch" }, {
       buildSidebar(),
-      buildMain(),
+      ui.column({ flexGrow = 1, gap = 0 }, {
+        buildMain(),
+      }),
     }),
   }))
 end

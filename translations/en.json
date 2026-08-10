@@ -1,20 +1,13 @@
 {
-  "clicks": {
-    "one": "Clicked {count} time",
-    "other": "Clicked {count} times"
-  },
   "settings": {
-    "glyph": {
-      "description": "Glyph shown before the label",
-      "label": "Glyph"
+    "show_cpu": {
+      "label": "Show CPU Usage",
+      "description": "Display CPU usage percentage in the bar"
     },
-    "label": {
-      "description": "Text shown in the bar",
-      "label": "Label"
-    },
-    "show_glyph": {
-      "label": "Show Glyph"
+    "show_ram": {
+      "label": "Show RAM Usage",
+      "description": "Display RAM usage percentage in the bar"
     }
   },
-  "title": "Hellow world "
+  "title": "System Monitor"
 }
