@@ -5,6 +5,7 @@
 local MAX_SAMPLES = 60
 
 local history = {}
+local tempHistory = {}
 local usage = 0
 local temp = nil
 local freq = nil
@@ -38,6 +39,11 @@ function M.tick()
   table.insert(history, usage / 100)
   if #history > MAX_SAMPLES then
     table.remove(history, 1)
+  end
+
+  table.insert(tempHistory, (temp or 0) / 100)
+  if #tempHistory > MAX_SAMPLES then
+    table.remove(tempHistory, 1)
   end
 
   if usage < minUsage then minUsage = usage end
@@ -104,14 +110,21 @@ function M.build()
     }),
     ui.row({ gap = 8, align = "stretch" }, {
       ui.column({ justify = "space_between", width = 36, gap = 0 }, {
-        ui.label({ text = "100%", fontSize = 10, color = "outline" }),
-        ui.label({ text = "75%", fontSize = 10, color = "outline" }),
-        ui.label({ text = "50%", fontSize = 10, color = "outline" }),
-        ui.label({ text = "25%", fontSize = 10, color = "outline" }),
-        ui.label({ text = "0%", fontSize = 10, color = "outline" }),
+        ui.label({ text = "100%", fontSize = 10, color = "primary" }),
+        ui.label({ text = "75%", fontSize = 10, color = "primary" }),
+        ui.label({ text = "50%", fontSize = 10, color = "primary" }),
+        ui.label({ text = "25%", fontSize = 10, color = "primary" }),
+        ui.label({ text = "0%", fontSize = 10, color = "primary" }),
       }),
       ui.column({ flexGrow = 1, gap = 4 }, {
-        ui.graph({ values = { table.unpack(history) }, color = getUsageColor(), fillOpacity = 0.3, lineWidth = 2, height = 320 }),
+        ui.graph({
+          values = { table.unpack(history) },
+          color = "primary",
+          values2 = { table.unpack(tempHistory) },
+          color2 = "error",
+          lineWidth = 2,
+          height = 700,
+        }),
         ui.row({ justify = "space_between" }, {
           ui.label({ text = "60s ago", fontSize = 10, color = "outline" }),
           ui.label({ text = "now", fontSize = 10, color = "outline" }),
@@ -147,8 +160,6 @@ function M.build()
 
   if showCores then
     table.insert(children, buildCores())
-  else
-    table.insert(children, ui.spacer())
   end
 
   return ui.column({ flexGrow = 1, gap = 12 }, children)
