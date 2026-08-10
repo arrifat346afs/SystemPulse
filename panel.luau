@@ -125,3 +125,9 @@ function update()
   end
   render()
 end
+
+function onIpc(event, _payload)
+  if event == "open" or event == "toggle" then
+    render()
+  end
+end
