@@ -1,33 +1,45 @@
-# Example
+# System Monitor
 
-A minimal plugin demonstrating a bar widget that opens a floating panel when
-clicked.
+A bar widget that displays live CPU and RAM usage, with a detailed floating panel showing CPU, RAM, Disk, Network, and GPU monitoring.
 
 ## Plugin
 
 | Field | Value |
 | --- | --- |
-| ID | `noctalia/example` |
-| Entries | Bar widget: `hello`; panel: `panel` |
+| ID | `noctalia/system-monitor` |
+| Entries | Bar widget: `sysmon`; panel: `panel`; shortcut: `toggle` |
 
 ## Usage
 
-Add the `hello` widget from the Add-widget picker. Clicking the widget toggles
-the floating panel (`noctalia/example:panel`). The widget's tooltip shows the
-click count.
+Add the `sysmon` widget from the Add-widget picker. Clicking the widget opens the floating system monitor panel.
 
 ## Settings
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
-| `label` | `string` | `Hello` | Text shown in the bar widget. |
-| `glyph` | `glyph` | `puzzle` | Glyph shown before the label. |
-| `show_glyph` | `bool` | `true` | Controls whether the glyph is visible. |
+| `show_cpu` | `bool` | `true` | Display CPU usage percentage in the bar. |
+| `show_ram` | `bool` | `true` | Display RAM usage percentage in the bar. |
 
-## IPC
+## Keybind
 
-You can also open the panel from the shell:
+Open the panel from the shell:
 
 ```sh
-noctalia msg panel-toggle noctalia/example:panel
+noctalia msg panel-toggle noctalia/system-monitor:panel
 ```
+
+Or via plugin IPC:
+
+```sh
+noctalia msg plugin noctalia/system-monitor:panel all open
+```
+
+To set up a Hyprland keybind, add to your `binds.lua`:
+
+```lua
+bind = SHIFT+CTRL, Escape, exec, noctalia msg panel-toggle noctalia/system-monitor:panel
+```
+
+## Shortcut
+
+Add the `toggle` shortcut from Settings → Control Center shortcuts to toggle the panel from the control center.
