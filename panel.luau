@@ -38,14 +38,20 @@ local function sidebarItem(id, label, subtitle, value, module)
 
   local graphElement = nil
   if preview and #preview.values > 0 then
-    graphElement = ui.graph({
-      values = preview.values,
-      color = color,
+    graphElement = ui.box({
       height = 50,
-      lineWidth = 1.5,
+      radius = 4,
+      border = "outline/0.3",
+      padding = 4,
+    }, {
+      ui.graph({
+        values = preview.values,
+        color = color,
+        lineWidth = 1.5,
+      }),
     })
   else
-    graphElement = ui.box({ height = 50 })
+    graphElement = ui.box({ height = 50, border = "outline/0.3", radius = 4 })
   end
 
   return ui.column({
