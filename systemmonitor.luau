@@ -43,3 +43,9 @@ end
 function onClick()
   noctalia.togglePanel("noctalia/system-monitor:panel")
 end
+
+function onIpc(event, payload)
+  if event == "open" then
+    noctalia.togglePanel("noctalia/system-monitor:panel")
+  end
+end
