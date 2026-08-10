@@ -27,6 +27,11 @@ entry = "systemmonitor.luau"
   label_key = "settings.show_ram.label"
   default = true
 
+# Control-center quick-toggle tile. Add it from Settings → Control Center shortcuts.
+[[shortcut]]
+id = "toggle"
+entry = "shortcut.luau"
+
 # Floating panel opened when the widget is clicked.
 [[panel]]
 id = "panel"
