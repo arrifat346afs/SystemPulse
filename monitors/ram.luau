@@ -58,30 +58,21 @@ local function formatMb(mb)
 end
 
 local function buildYLabels()
-  return ui.column({ justify = "space_between", width = 40 }, {
-    ui.label({ text = "100%", fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "75%", fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "50%", fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "25%", fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "0%", fontSize = 10, color = "on_surface_variant" }),
-  })
+  return ui.column({ width = 0 })
 end
 
 local function buildGraph()
   return ui.column({ flexGrow = 1, gap = 4 }, {
-    ui.row({ gap = 8, align = "stretch", flexGrow = 1 }, {
-      buildYLabels(),
-      ui.column({ flexGrow = 1, gap = 4 }, {
-        ui.graph({
-          values = { table.unpack(history) },
-          color = "tertiary",
-          lineWidth = 2,
-          flexGrow = 1,
-        }),
-        ui.row({ justify = "space_between" }, {
-          ui.label({ text = "Memory usage over 1 minute", fontSize = 10, color = "on_surface_variant" }),
-          ui.label({ text = formatMb(totalMb), fontSize = 10, color = "on_surface_variant" }),
-        }),
+    ui.column({ flexGrow = 1, gap = 4 }, {
+      ui.graph({
+        values = { table.unpack(history) },
+        color = "tertiary",
+        lineWidth = 2,
+        flexGrow = 1,
+      }),
+      ui.row({ justify = "space_between" }, {
+        ui.label({ text = "Memory usage over 1 minute", fontSize = 10, color = "on_surface_variant" }),
+        ui.label({ text = formatMb(totalMb), fontSize = 10, color = "on_surface_variant" }),
       }),
     }),
   })
@@ -105,7 +96,7 @@ local function buildStatsPanel()
     }))
   end
   return ui.column({
-    fill = "surface_variant/0.6",
+    fill = "surface_variant/0.4",
     radius = 8,
     padding = 12,
     gap = 6,

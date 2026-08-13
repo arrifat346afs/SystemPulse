@@ -56,10 +56,10 @@ local function sidebarItem(id, label, subtitle, value, module)
 
   return ui.column({
     key = id,
-    opacity = isSelected and 1.0 or 0.5,
-    fill = "surface_variant/0.4",
+    opacity = isSelected and 1.0 or 1,
+    fill = isSelected and "primary/0.2" or "surface_variant/0.4",
     radius = 10,
-    border = "outline/0.2",
+    border = "outline",
     borderWidth = 1,
     padding = { left = 8, right = 2, top = 6, bottom = 6 },
     gap = 0,
@@ -117,7 +117,7 @@ local function buildSidebar()
     table.insert(appItems, appItem(proc))
   end
 
-  return ui.column({ width = 180, gap = 6}, {
+  return ui.column({ width = 180, gap = 6, fill = "surface_variant/0.4", radius = 10, padding = 6 }, {
     -- ui.label({ text = "Devices", fontSize = 14, fontWeight = "bold" }),
     sidebarItem("cpu", "CPU", cpu.getSubtitle and cpu.getSubtitle() or "", cpuVal, cpu),
     sidebarItem("ram", "Memory", ram.getSubtitle and ram.getSubtitle() or "", ramVal, ram),

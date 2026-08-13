@@ -89,13 +89,7 @@ local function formatBytes(bytes)
 end
 
 local function buildYLabels()
-  return ui.column({ justify = "space_between", width = 60 }, {
-    ui.label({ text = formatSpeed(maxThroughput), fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = formatSpeed(maxThroughput * 0.75), fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = formatSpeed(maxThroughput * 0.5), fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = formatSpeed(maxThroughput * 0.25), fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "0 B/s", fontSize = 10, color = "on_surface_variant" }),
-  })
+  return ui.column({ width = 0 })
 end
 
 local function buildGraph()
@@ -106,21 +100,18 @@ local function buildGraph()
     normalizedTx[i] = txHistory[i] / maxThroughput
   end
   return ui.column({ flexGrow = 1, gap = 4 }, {
-    ui.row({ gap = 8, align = "stretch", flexGrow = 1 }, {
-      buildYLabels(),
-      ui.column({ flexGrow = 1, gap = 4 }, {
-        ui.graph({
-          values = normalizedRx,
-          color = "error",
-          values2 = normalizedTx,
-          color2 = "tertiary",
-          lineWidth = 2,
-          flexGrow = 1,
-        }),
-        ui.row({ justify = "space_between" }, {
-          ui.label({ text = "Throughput over 1 minute", fontSize = 10, color = "on_surface_variant" }),
-          ui.label({ text = "—", fontSize = 10, color = "on_surface_variant" }),
-        }),
+    ui.column({ flexGrow = 1, gap = 4 }, {
+      ui.graph({
+        values = normalizedRx,
+        color = "error",
+        values2 = normalizedTx,
+        color2 = "tertiary",
+        lineWidth = 2,
+        flexGrow = 1,
+      }),
+      ui.row({ justify = "space_between" }, {
+        ui.label({ text = "Throughput over 1 minute", fontSize = 10, color = "on_surface_variant" }),
+        ui.label({ text = "—", fontSize = 10, color = "on_surface_variant" }),
       }),
     }),
   })
@@ -159,7 +150,7 @@ local function buildStatsPanel()
   end
 
   return ui.column({
-    fill = "surface_variant/0.6",
+    fill = "surface_variant/0.4",
     radius = 8,
     padding = 12,
     gap = 6,

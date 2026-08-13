@@ -4,6 +4,7 @@
 local refresh = nil
 local sysInfo = {}
 local loaded = false
+local gpuInfo = nil
 
 local M = {}
 
@@ -56,6 +57,50 @@ end
 
 -- Static info: read once, never changes
 local staticInfo = nil
+
+local function detectGpuDriver(deviceName)
+  local vendor = (deviceName or ""):lower()
+  local paths = {
+    { k = "amdgpu", v = "/sys/module/amdgpu/version" },
+    { k = "radeon", v = "/sys/module/radeon/version" },
+    { k = "nvidia", v = "/sys/module/nvidia_drm/version" },
+    { k = "intel", v = "/sys/module/i915/version" },
+  }
+  for _, p in ipairs(paths) do
+    if vendor:find(p.k, 1, true) then
+      local ver = readFile(p.v)
+      if ver and ver ~= "" then return ver end
+    end
+  end
+  local nv = readFile("/proc/driver/nvidia/version")
+  if nv then
+    local ver = nv:match("(%d+%.%d+%.%d+)")
+    if ver then return ver end
+  end
+  return "N/A"
+end
+
+local function loadGpuInfo()
+  if gpuInfo ~= nil then return gpuInfo end
+  if not noctalia.commandExists("nvtop") then
+    gpuInfo = { name = "GPU", vram = "N/A", driver = "N/A" }
+    return gpuInfo
+  end
+  gpuInfo = { name = "GPU", vram = "N/A", driver = "N/A" }
+  noctalia.runAsync("nvtop -s", function(result)
+    if result == nil or result.exitCode ~= 0 or result.stdout == nil then return end
+    local ok, data = pcall(noctalia.json.decode, result.stdout)
+    if not ok or type(data) ~= "table" or data[1] == nil then return end
+    local gpu = data[1]
+    local name = gpu.device_name or "GPU"
+    gpuInfo = {
+      name = name,
+      vram = formatBytes(tonumber(gpu.mem_total) or 0),
+      driver = detectGpuDriver(name),
+    }
+  end, 5000)
+  return gpuInfo
+end
 
 local function loadStaticInfo()
   if staticInfo then return staticInfo end
@@ -165,6 +210,15 @@ function M.tick()
         { label = "Motherboard", value = si.motherboard },
       },
     })
+
+    local gpu = loadGpuInfo()
+    if gpu then
+      table.insert(sysInfo, { section = "Graphics", items = {
+        { label = "GPU", value = gpu.name },
+        { label = "VRAM", value = gpu.vram },
+        { label = "Driver", value = gpu.driver },
+      }})
+    end
 
     local disks = {}
     local mounts = noctalia.diskMounts()

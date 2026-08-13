@@ -16,12 +16,23 @@ local showCores = false
 local refresh = nil
 local minUsage = 100
 local maxUsage = 0
+local cpuName = "CPU"
 
 local M = {}
 
 function M.attach(fn)
   refresh = fn
   noctalia.setUpdateInterval(1000)
+  local raw = noctalia.readFile("/proc/cpuinfo")
+  if raw ~= nil then
+    local _, _, name = raw:find("model name%s*:%s*([^\n]*)")
+    if name ~= nil and name ~= "" then
+      cpuName = name:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+    else
+      _, _, name = raw:find("hardware%s*:%s*([^\n]*)")
+      if name ~= nil and name ~= "" then cpuName = name end
+    end
+  end
 end
 
 function M.getPreview()
@@ -94,32 +105,23 @@ local function formatGhz(mhz)
 end
 
 local function buildYLabels()
-  return ui.column({ justify = "space_between", width = 40 }, {
-    ui.label({ text = "100%", fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "75%", fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "50%", fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "25%", fontSize = 10, color = "on_surface_variant" }),
-    ui.label({ text = "0%", fontSize = 10, color = "on_surface_variant" }),
-  })
+  return ui.column({ width = 0 })
 end
 
 local function buildGraph()
   return ui.column({ flexGrow = 1, gap = 4 }, {
-    ui.row({ gap = 8, align = "stretch", flexGrow = 1 }, {
-      buildYLabels(),
-      ui.column({ flexGrow = 1, gap = 4 }, {
-        ui.graph({
-          values = { table.unpack(history) },
-          color = "primary",
-          values2 = { table.unpack(tempHistory) },
-          color2 = "error",
-          lineWidth = 2,
-          flexGrow = 1,
-        }),
-        ui.row({ justify = "space_between" }, {
-          ui.label({ text = "Utilization over 1 minute", fontSize = 10, color = "on_surface_variant" }),
-          ui.label({ text = "100%", fontSize = 10, color = "on_surface_variant" }),
-        }),
+    ui.column({ flexGrow = 1, gap = 4 }, {
+      ui.graph({
+        values = { table.unpack(history) },
+        color = "primary",
+        values2 = { table.unpack(tempHistory) },
+        color2 = "error",
+        lineWidth = 2,
+        flexGrow = 1,
+      }),
+      ui.row({ justify = "space_between" }, {
+        ui.label({ text = "Utilization over 1 minute", fontSize = 10, color = "on_surface_variant" }),
+        ui.label({ text = "100%", fontSize = 10, color = "on_surface_variant" }),
       }),
     }),
   })
@@ -149,7 +151,7 @@ local function buildStatsPanel()
     }))
   end
   return ui.column({
-    fill = "surface_variant/0.6",
+    fill = "surface_variant/0.4",
     radius = 8,
     padding = 12,
     gap = 6,
@@ -164,7 +166,7 @@ function M.build()
   return ui.column({ flexGrow = 1, gap = 0 }, {
     ui.row({ padding = { left = 12, right = 12, top = 12, bottom = 4 }, align = "center", justify = "space_between" }, {
       ui.column({ gap = 2 }, {
-        ui.label({ text = "CPU", fontSize = 18, fontWeight = "bold" }),
+        ui.label({ text = cpuName, fontSize = 18, fontWeight = "bold" }),
         ui.label({ text = "Utilization over 1 minute", fontSize = 11, color = "on_surface_variant" }),
       }),
       ui.label({ text = string.format("%d%%", usage), fontSize = 18, fontWeight = "bold", color = "primary" }),
