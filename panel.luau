@@ -77,7 +77,7 @@ local function sidebarItem(id, label, subtitle, value, module)
     }),
   })
 end
-
+-- 
 local function formatMem(rssKb)
   if rssKb >= 1048576 then
     return string.format("%.1f GiB", rssKb / 1048576)
