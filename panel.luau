@@ -56,10 +56,10 @@ local function sidebarItem(id, label, subtitle, value, module)
 
   return ui.column({
     key = id,
-    opacity = isSelected and 1.0 or 1,
-    fill = isSelected and "primary/0.2" or "surface_variant/0.4",
+    opacity = isSelected and 1.0 or 0.65,
+    fill = isSelected and "primary/0.25" or "surface_variant/0.4",
     radius = 10,
-    border = "outline",
+    border = "outline/0.25",
     borderWidth = 1,
     padding = { left = 8, right = 2, top = 6, bottom = 6 },
     gap = 0,
@@ -69,10 +69,10 @@ local function sidebarItem(id, label, subtitle, value, module)
       ui.column({ width = 55 }, {
         graphElement,
       }),
-      ui.column({ flexGrow = 1, gap = 2 }, {
-        ui.label({ text = label, fontSize = 13, fontWeight = "bold" }),
-        ui.label({ text = subtitle, fontSize = 10, color = "on_surface_variant" }),
-        ui.label({ text = value, fontSize = 11, color = color }),
+      ui.column({ width = 110, gap = 2 }, {
+        ui.label({ text = label, fontSize = 13, fontWeight = "bold", width = 110 }),
+        ui.label({ text = subtitle, fontSize = 10, color = "on_surface_variant", width = 110 }),
+        ui.label({ text = value, fontSize = 11, color = color, width = 110 }),
       }),
     }),
   })

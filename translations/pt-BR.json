@@ -1,20 +1,25 @@
 {
-  "clicks": {
-    "one": "Clicado {count} vez",
-    "other": "Clicado {count} vezes"
-  },
   "settings": {
-    "glyph": {
-      "description": "Símbolo exibido antes do rótulo",
-      "label": "Símbolo"
+    "show_cpu": {
+      "label": "Mostrar uso de CPU",
+      "description": "Exibir porcentagem de uso da CPU na barra"
     },
-    "label": {
-      "description": "Texto exibido na barra",
-      "label": "Rótulo"
+    "show_ram": {
+      "label": "Mostrar uso de RAM",
+      "description": "Exibir porcentagem de uso da RAM na barra"
     },
-    "show_glyph": {
-      "label": "Exibir Símbolo"
+    "show_gpu": {
+      "label": "Mostrar uso de GPU",
+      "description": "Exibir porcentagem de uso da GPU na barra"
+    },
+    "show_disk": {
+      "label": "Mostrar uso de disco",
+      "description": "Exibir porcentagem de uso do disco na barra"
+    },
+    "show_network": {
+      "label": "Mostrar uso de rede",
+      "description": "Exibir uso da rede na barra"
     }
   },
-  "title": "Exemplo"
+  "title": "Monitor do Sistema"
 }

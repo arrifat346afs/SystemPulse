@@ -1,20 +1,25 @@
 {
-  "clicks": {
-    "one": "点击了 {count} 次",
-    "other": "点击了 {count} 次"
-  },
   "settings": {
-    "glyph": {
-      "description": "显示在标签前的图标",
-      "label": "图标"
+    "show_cpu": {
+      "label": "显示CPU使用率",
+      "description": "在状态栏显示CPU使用百分比"
     },
-    "label": {
-      "description": "显示在状态栏的文本",
-      "label": "标签"
+    "show_ram": {
+      "label": "显示内存使用率",
+      "description": "在状态栏显示内存使用百分比"
     },
-    "show_glyph": {
-      "label": "显示图标"
+    "show_gpu": {
+      "label": "显示GPU使用率",
+      "description": "在状态栏显示GPU使用百分比"
+    },
+    "show_disk": {
+      "label": "显示磁盘使用率",
+      "description": "在状态栏显示磁盘使用百分比"
+    },
+    "show_network": {
+      "label": "显示网络使用率",
+      "description": "在状态栏显示网络使用情况"
     }
   },
-  "title": "示例"
+  "title": "系统监控"
 }

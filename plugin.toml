@@ -27,6 +27,24 @@ entry = "systemmonitor.luau"
   label_key = "settings.show_ram.label"
   default = true
 
+  [[widget.setting]]
+  key = "show_gpu"
+  type = "bool"
+  label_key = "settings.show_gpu.label"
+  default = false
+
+  [[widget.setting]]
+  key = "show_disk"
+  type = "bool"
+  label_key = "settings.show_disk.label"
+  default = false
+
+  [[widget.setting]]
+  key = "show_network"
+  type = "bool"
+  label_key = "settings.show_network.label"
+  default = false
+
 # Control-center quick-toggle tile. Add it from Settings → Control Center shortcuts.
 [[shortcut]]
 id = "toggle"
