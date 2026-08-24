@@ -25,19 +25,19 @@ Add the `sysmon` widget from the Add-widget picker. Clicking the widget opens th
 Open the panel from the shell:
 
 ```sh
-noctalia msg panel-toggle noctalia/system-monitor:panel
+noctalia msg panel-toggle arrifat346afs/system-monitor:panel
 ```
 
 Or via plugin IPC:
 
 ```sh
-noctalia msg plugin noctalia/system-monitor:panel all open
+noctalia msg plugin arrifat346afs/system-monitor:panel
 ```
 
 To set up a Hyprland keybind, add to your `binds.lua`:
 
 ```lua
-bind = SHIFT+CTRL, Escape, exec, noctalia msg panel-toggle noctalia/system-monitor:panel
+hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd(noctCall .. "panel-toggle  arrifat346afs/system-monitor:panel"), { description = "Toggle system monitor panel" })
 ```
 
 ## Shortcut
