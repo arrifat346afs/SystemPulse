@@ -11,5 +11,6 @@ end
 render()
 
 function onClick()
-  noctalia.togglePanel("noctalia/system-monitor:panel")
+  noctalia.togglePanel("arrifat346afs/system-monitor:panel")
 end
+

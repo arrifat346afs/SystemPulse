@@ -87,11 +87,11 @@ function update()
 end
 
 function onClick()
-  noctalia.togglePanel("noctalia/system-monitor:panel")
+  noctalia.togglePanel("arrifat346afs/system-monitor:panel")
 end
 
 function onIpc(event, payload)
   if event == "open" then
-    noctalia.togglePanel("noctalia/system-monitor:panel")
+    noctalia.togglePanel("arrifat346afs/system-monitor:panel")
   end
 end

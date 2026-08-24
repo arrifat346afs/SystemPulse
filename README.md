@@ -11,7 +11,7 @@ A bar widget that displays live CPU and RAM usage, with a detailed floating pane
 
 ## Usage
 
-Add the `sysmon` widget from the Add-widget picker. Clicking the widget opens the floating system monitor panel.
+Add the `sysmon` widget from the Add-widget picker. Clicking the widget opens the system monitor panel, which attaches to the bar so its background follows the bar's `background_opacity`.
 
 ## Settings
 

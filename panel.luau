@@ -132,15 +132,19 @@ end
 local function buildPerformanceView()
   return ui.row({ flexGrow = 1, gap = 12, align = "stretch" }, {
     buildSidebar(),
-    ui.column({ flexGrow = 1, gap = 0 }, {
+    ui.column({ flexGrow = 1, gap = 0, align = "stretch" }, {
       monitors[tab].build(),
     }),
   })
 end
 
+
+
+
+
 function render()
-  panel.render(ui.column({ flexGrow = 1, gap = 0, padding = { bottom = 20 } }, {
-    ui.row({ align = "center", justify = "space_between", padding = { left = 12, right = 12, top = 8, bottom = 10 } }, {
+  panel.render(ui.column({ flexGrow = 1, gap = 0,padding = 0,align = "stretch"  }, {
+    ui.row({ align = "center", justify = "space_between"}, {
       ui.label({ text = "System Monitor", fontSize = 16, fontWeight = "bold" }),
       ui.button({ glyph = "close", onClick = "onCloseClicked" }),
     }),

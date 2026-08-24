@@ -1,10 +1,10 @@
 # System Monitor plugin: a bar widget that shows CPU/RAM usage and opens a detailed panel.
 
-id = "noctalia/system-monitor"
+id = "arrifat346afs/system-monitor"
 name = "System Monitor"
-version = "1.0.0"
+version = "1.1.0"
 plugin_api = 22
-author = "noctalia"
+author = "arrifat346afs "
 license = "MIT"
 dependencies = []
 tags = ["system", "monitor", "performance"]
@@ -50,12 +50,25 @@ entry = "systemmonitor.luau"
 id = "toggle"
 entry = "shortcut.luau"
 
-# Floating panel opened when the widget is clicked.
+# Panel opened when the widget is clicked. Attached to the bar so the panel
+# background follows the bar's background_opacity.
 [[panel]]
 id = "panel"
 entry = "panel.luau"
 width = 1080
 height = 720
-placement = "floating"
+placement = "attached"
 position = "center"
 open_near_click = true
+
+  # Panel background translucency; content stays opaque. Edited under
+  # Settings → Plugins (gear icon).
+  [[panel.setting]]
+  key = "panel_background_opacity"
+  type = "double"
+  label_key = "settings.panel_background_opacity.label"
+  description_key = "settings.panel_background_opacity.description"
+  default = 1.0
+  min = 0.0
+  max = 1.0
+  step = 0.01
