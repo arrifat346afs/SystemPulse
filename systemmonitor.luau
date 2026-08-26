@@ -1,5 +1,5 @@
 --!nonstrict
--- A bar widget that displays system stats and opens the system monitor panel.
+-- A bar widget that displays system stats and opens the SystemPulse panel.
 
 -- Widget visibility flags, configured via plugin settings (see plugin.toml).
 local showCpu = noctalia.getConfig("show_cpu")
@@ -54,12 +54,12 @@ local function render()
 
   local text = table.concat(parts, " | ")
   if text == "" then
-    text = "System Monitor"
+    text = "SystemPulse"
   end
 
   barWidget.setGlyph("cpu")
   barWidget.setText(text)
-  barWidget.setTooltip("Click to open System Monitor")
+  barWidget.setTooltip("Click to open SystemPulse")
 end
 
 -- Called by the host every update interval. Samples system stats, caches
@@ -96,12 +96,12 @@ end
 
 -- Opens (or closes) the detail panel when the bar widget is clicked.
 function onClick()
-  noctalia.togglePanel("arrifat346afs/system-monitor:panel")
+  noctalia.togglePanel("arrifat346afs/systempulse:panel")
 end
 
 -- IPC hook: lets other plugins/scripts open the panel via the "open" event.
 function onIpc(event, payload)
   if event == "open" then
-    noctalia.togglePanel("arrifat346afs/system-monitor:panel")
+    noctalia.togglePanel("arrifat346afs/systempulse:panel")
   end
 end

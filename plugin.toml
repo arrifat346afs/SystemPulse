@@ -1,7 +1,7 @@
-# System Monitor plugin: a bar widget that shows CPU/RAM usage and opens a detailed panel.
+# SystemPulse plugin: a bar widget that shows CPU/RAM usage and opens a detailed panel.
 
-id = "arrifat346afs/system-monitor"
-name = "System Monitor"
+id = "arrifat346afs/systempulse"
+name = "SystemPulse"
 version = "1.1.0"
 plugin_api = 22
 author = "arrifat346afs "
@@ -9,7 +9,7 @@ license = "MIT"
 dependencies = []
 tags = ["system", "monitor", "performance"]
 icon = "cpu"
-description = "A bar widget that displays system stats and opens a detailed monitor panel."
+description = "A bar widget that displays system stats and opens a detailed SystemPulse panel."
 
 [[widget]]
 id = "sysmon"

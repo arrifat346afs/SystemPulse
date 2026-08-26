@@ -1,4 +1,4 @@
-#   Monitor
+# SystemPulse
 
 A bar widget that displays live CPU and RAM usage, with a detailed floating panel showing CPU, RAM, Disk, Network, and GPU monitoring.
 
@@ -6,7 +6,7 @@ A bar widget that displays live CPU and RAM usage, with a detailed floating pane
 
 | Field | Value |
 | --- | --- |
-| ID | `noctalia/system-monitor` |
+| ID | `arrifat346afs/systempulse` |
 | Entries | Bar widget: `sysmon`; panel: `panel`; shortcut: `toggle` |
 
 ## Usage
@@ -25,21 +25,21 @@ Add the `sysmon` widget from the Add-widget picker. Clicking the widget opens th
 Open the panel from the shell:
 
 ```sh
-noctalia msg panel-toggle arrifat346afs/system-monitor:panel
+noctalia msg panel-toggle arrifat346afs/systempulse:panel
 ```
 
 Or via plugin IPC:
 
 ```sh
-noctalia msg plugin arrifat346afs/system-monitor:panel
+noctalia msg plugin arrifat346afs/systempulse:panel
 ```
 
 To set up a Hyprland keybind, add to your `binds.lua`:
 
 ```lua
-hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd(noctCall .. "panel-toggle  arrifat346afs/system-monitor:panel"), { description = "Toggle system monitor panel" })
+hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd(noctCall .. "panel-toggle  arrifat346afs/systempulse:panel"), { description = "Toggle SystemPulse panel" })
 ```
 
 ## Shortcut
 
-Add the `toggle` shortcut from Settings → Control Center shortcuts to toggle the panel from the control center.
+Add the `toggle` shortcut from Settings → Control Center shortcuts to toggle the SystemPulse panel from the control center.

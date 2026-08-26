@@ -1,9 +1,9 @@
 --!nonstrict
--- Control-center [[shortcut]] entry for System Monitor.
+-- Control-center [[shortcut]] entry for SystemPulse.
 
 -- Sets up the control-center tile: label, icon and enabled state.
 local function render()
-  shortcut.setLabel("System Monitor")
+  shortcut.setLabel("SystemPulse")
   shortcut.setIcon("cpu")
   shortcut.setActive(false)
   shortcut.setEnabled(true)
@@ -11,8 +11,8 @@ end
 
 render()
 
--- Opens (or closes) the System Monitor panel.
+-- Opens (or closes) the SystemPulse panel.
 function onClick()
-  noctalia.togglePanel("arrifat346afs/system-monitor:panel")
+  noctalia.togglePanel("arrifat346afs/systempulse:panel")
 end
 

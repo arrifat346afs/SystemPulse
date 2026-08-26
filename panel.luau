@@ -1,5 +1,5 @@
 --!nonstrict
--- System monitor panel with sidebar showing device cards and individual app usages.
+-- SystemPulse panel with sidebar showing device cards and individual app usages.
 
 -- Detail view modules, one per device tab. Each exposes the shared monitor
 -- interface: attach/getPreview/getValue/getSubtitle/tick/build.
@@ -163,7 +163,7 @@ end
 function render()
   panel.render(ui.column({ flexGrow = 1, gap = 0,padding = 0,align = "stretch"  }, {
     ui.row({ align = "center", justify = "space_between"}, {
-      ui.label({ text = "System Monitor", fontSize = 16, fontWeight = "bold" }),
+      ui.label({ text = "SystemPulse", fontSize = 16, fontWeight = "bold" }),
       ui.button({ glyph = "close", onClick = "onCloseClicked" }),
     }),
     ui.separator({ spacing = 12 }),
