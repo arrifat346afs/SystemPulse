@@ -1,6 +1,15 @@
 --!nonstrict
 -- CPU monitor detail view: Mission Center style with full-width graph and stats panel.
+--
+-- Shared monitor interface consumed by panel.luau:
+--   attach(fn)    one-time setup; fn is the panel re-render callback
+--   getPreview()  sparkline data for the sidebar card (nil before first sample)
+--   getValue()    headline usage text, e.g. "42%"
+--   getSubtitle() secondary line (current temperature)
+--   tick()        sample once per update interval
+--   build()       element tree for this tab's detail view
 
+-- Rolling sample buffers: one point per tick, capped at 60 (~1 minute at 1s).
 local MAX_SAMPLES = 60
 
 local history = {}
@@ -20,6 +29,9 @@ local cpuName = "CPU"
 
 local M = {}
 
+-- One-time setup: store the refresh callback, switch to 1s updates and read
+-- the CPU model name from /proc/cpuinfo (falls back to the "hardware" line,
+-- e.g. on ARM devices).
 function M.attach(fn)
   refresh = fn
   noctalia.setUpdateInterval(1000)
@@ -35,6 +47,7 @@ function M.attach(fn)
   end
 end
 
+-- Sidebar sparkline source: normalized utilization history.
 function M.getPreview()
   if #history == 0 then
     return nil
@@ -42,6 +55,7 @@ function M.getPreview()
   return { values = { table.unpack(history) }, color = "primary" }
 end
 
+-- Usage percent for the sidebar value line; em dash before the first sample.
 function M.getValue()
   if usage == 0 then
     return "—"
@@ -49,6 +63,7 @@ function M.getValue()
   return string.format("%d%%", usage)
 end
 
+-- Temperature as NN°C; empty until a sensor reading exists.
 function M.getSubtitle()
   if temp == nil then
     return ""
@@ -56,6 +71,9 @@ function M.getSubtitle()
   return string.format("%d°C", temp)
 end
 
+-- Per-tick sampling: refresh stats, push new points onto the usage and
+-- temperature buffers, track session min/max, and record per-core history
+-- only while showCores is enabled (keeps idle cost low).
 function M.tick()
   local s = noctalia.systemStats()
   if s == nil then

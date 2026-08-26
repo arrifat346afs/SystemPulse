@@ -1,6 +1,8 @@
 --!nonstrict
 -- System monitor panel with sidebar showing device cards and individual app usages.
 
+-- Detail view modules, one per device tab. Each exposes the shared monitor
+-- interface: attach/getPreview/getValue/getSubtitle/tick/build.
 local cpu = require("./monitors/cpu.luau")
 local ram = require("./monitors/ram.luau")
 local disk = require("./monitors/disk.luau")
@@ -17,9 +19,12 @@ local monitors = {
   system = system,
 }
 
+-- Currently selected sidebar tab (must match a key in `monitors`).
 local tab = "cpu"
+-- Top CPU-consuming processes for the "apps" list at the bottom of the sidebar.
 local processes = {}
 
+-- Theme color role used to tint each device's card, graph and value label.
 local deviceColors = {
   cpu = "primary",
   ram = "tertiary",
@@ -29,6 +34,9 @@ local deviceColors = {
   system = "on_surface_variant",
 }
 
+-- Builds a single device card for the sidebar: a mini sparkline preview plus
+-- label, subtitle and current value. Clicking it switches the main view to
+-- that device's tab.
 local function sidebarItem(id, label, subtitle, value, module)
   local color = deviceColors[id] or "primary"
   local preview = module and module.getPreview and module.getPreview() or nil
@@ -39,6 +47,7 @@ local function sidebarItem(id, label, subtitle, value, module)
     render()
   end
 
+  -- Sparkline preview from the module's sample history; empty box until data exists.
   local graphElement = nil
   if preview and #preview.values > 0 then
     graphElement = ui.column({ height = 50, border = "outline/0.3", radius = 4 }, {
@@ -56,6 +65,7 @@ local function sidebarItem(id, label, subtitle, value, module)
 
   return ui.column({
     key = id,
+    -- Highlight the selected tab; dim the rest.
     opacity = isSelected and 1.0 or 0.65,
     fill = isSelected and "primary/0.25" or "surface_variant/0.4",
     radius = 10,
@@ -78,6 +88,7 @@ local function sidebarItem(id, label, subtitle, value, module)
   })
 end
 -- 
+-- Formats a resident-memory size (KiB) with a human-readable unit.
 local function formatMem(rssKb)
   if rssKb >= 1048576 then
     return string.format("%.1f GiB", rssKb / 1048576)
@@ -87,10 +98,11 @@ local function formatMem(rssKb)
   return string.format("%.0f KiB", rssKb)
 end
 
+-- Builds one row in the app list: truncated process name, CPU% and memory.
 local function appItem(proc)
   local name = proc.name
   if #name > 25 then
-    name = name:sub(1, 22) .. "..."
+    name = name:sub(1, 22) .. "..." -- keep long process names on one line
   end
   return ui.row({
     key = "app_" .. tostring(proc.pid),
@@ -105,7 +117,9 @@ local function appItem(proc)
   })
 end
 
+-- Assembles the left sidebar: one card per device plus the app usage list.
 local function buildSidebar()
+  -- Current headline value for each device ("—" until first sample arrives).
   local cpuVal = cpu.getValue and cpu.getValue() or "—"
   local ramVal = ram.getValue and ram.getValue() or "—"
   local diskVal = disk.getValue and disk.getValue() or "—"
@@ -117,6 +131,7 @@ local function buildSidebar()
     table.insert(appItems, appItem(proc))
   end
 
+  -- Fixed-width column: device cards first, then the app list underneath.
   return ui.column({ width = 180, gap = 6, fill = "surface_variant/0.4", radius = 10, padding = 6 }, {
     -- ui.label({ text = "Devices", fontSize = 14, fontWeight = "bold" }),
     sidebarItem("cpu", "CPU", cpu.getSubtitle and cpu.getSubtitle() or "", cpuVal, cpu),
@@ -129,6 +144,8 @@ local function buildSidebar()
   })
 end
 
+-- Main content area: sidebar on the left, the active device's detail view
+-- (delegated to its module's build()) filling the rest.
 local function buildPerformanceView()
   return ui.row({ flexGrow = 1, gap = 12, align = "stretch" }, {
     buildSidebar(),
@@ -142,6 +159,7 @@ end
 
 
 
+-- Rebuilds the whole panel layout. Called on open, tab switches and ticks.
 function render()
   panel.render(ui.column({ flexGrow = 1, gap = 0,padding = 0,align = "stretch"  }, {
     ui.row({ align = "center", justify = "space_between"}, {
@@ -153,10 +171,13 @@ function render()
   }))
 end
 
+-- Close button handler.
 function onCloseClicked()
   panel.close()
 end
 
+-- Panel lifecycle: request per-second updates, wire each monitor module to
+-- re-render on data changes, then draw the initial layout.
 function onOpen(_context)
   panel.setWantsSecondTicks(true)
   for _, m in pairs(monitors) do
@@ -165,6 +186,8 @@ function onOpen(_context)
   render()
 end
 
+-- Periodic tick: advance every monitor's sampling, refresh the process list
+-- and redraw. Runs at the interval requested in onOpen (1s).
 function update()
   for _, m in pairs(monitors) do
     if m.tick then m.tick() end
@@ -174,6 +197,7 @@ function update()
   render()
 end
 
+-- IPC hook: redraw when another component requests open/toggle.
 function onIpc(event, _payload)
   if event == "open" or event == "toggle" then
     render()

@@ -1,6 +1,15 @@
 --!nonstrict
 -- RAM monitor detail view: Mission Center style with full-width graph and stats panel.
+--
+-- Shared monitor interface consumed by panel.luau:
+--   attach(fn)    one-time setup; fn is the panel re-render callback
+--   getPreview()  sparkline data for the sidebar card
+--   getValue()    headline usage text, e.g. "37.4%"
+--   getSubtitle() "used / total GiB"
+--   tick()        sample once per update interval
+--   build()       element tree for this tab's detail view
 
+-- Rolling usage buffer: one point per tick, capped at 60 (~1 minute at 1s).
 local MAX_SAMPLES = 60
 
 local history = {}
@@ -11,10 +20,12 @@ local refresh = nil
 
 local M = {}
 
+-- One-time setup: store the panel re-render callback.
 function M.attach(fn)
   refresh = fn
 end
 
+-- Sparkline source: normalized memory-usage history.
 function M.getPreview()
   if #history == 0 then
     return nil
@@ -22,6 +33,7 @@ function M.getPreview()
   return { values = { table.unpack(history) }, color = "tertiary" }
 end
 
+-- Usage percent with one decimal; em dash before the first sample.
 function M.getValue()
   if usagePercent == 0 then
     return "—"
@@ -29,6 +41,7 @@ function M.getValue()
   return string.format("%.1f%%", usagePercent)
 end
 
+-- "X.X / Y.Y GiB" used vs total; empty before the first sample.
 function M.getSubtitle()
   if totalMb == 0 then
     return ""
@@ -36,6 +49,7 @@ function M.getSubtitle()
   return string.format("%.1f / %.1f GiB", usedMb / 1024, totalMb / 1024)
 end
 
+-- Cache latest usage/used/total figures and append a point to the buffer.
 function M.tick()
   local s = noctalia.systemStats()
   if s == nil then
