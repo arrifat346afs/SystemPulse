@@ -51,21 +51,23 @@ end
 local function parseDiskStats()
   local content = noctalia.readFile("/proc/diskstats")
   if content == nil then
-    return 0, 0, 0, 0
+    return 0, 0
   end
 
-  local totalRead = 0
-  local totalWrite = 0
   local readSectors = 0
   local writeSectors = 0
 
   for line in content:gmatch("[^\n]+") do
-    local name, reads, _, _, _, readSect, _, _, writes, _, _, writeSect = line:match(
-      "^%s*(%S+)%s+(%d+)%s+%d+%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)%s+%d+%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)"
-    )
+    local fields = {}
+    for f in line:gmatch("%S+") do
+      fields[#fields + 1] = f
+    end
+    local name = fields[3]
+    local readSect = fields[6]
+    local writeSect = fields[10]
     if name and not name:match("^loop") and not name:match("^ram") then
-      readSectors = readSectors + (readSect or 0)
-      writeSectors = writeSectors + (writeSect or 0)
+      readSectors = readSectors + (tonumber(readSect) or 0)
+      writeSectors = writeSectors + (tonumber(writeSect) or 0)
     end
   end
 
