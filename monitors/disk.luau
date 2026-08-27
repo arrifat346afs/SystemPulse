@@ -150,7 +150,7 @@ local function buildThroughputGraph()
         flexGrow = 1,
       }),
       ui.row({ justify = "space_between" }, {
-        ui.label({ text = "Throughput over 1 minute", fontSize = 10, color = "on_surface_variant" }),
+        ui.label({ text = "Active over time", fontSize = 10, color = "on_surface_variant" }),
         ui.label({ text = "—", fontSize = 10, color = "on_surface_variant" }),
       }),
     }),
@@ -176,6 +176,7 @@ local function buildStatsPanel()
 
   for path, d in pairs(diskData) do
     local usedBytes = d.totalBytes - d.freeBytes
+    local pct = math.max(0, math.min(100, d.usagePercent or 0))
     table.insert(rows, ui.label({ text = "", fontSize = 4 }))
     table.insert(rows, ui.row({ justify = "space_between" }, {
       ui.label({ text = path, fontSize = 11, fontWeight = "bold" }),
@@ -188,6 +189,10 @@ local function buildStatsPanel()
     table.insert(rows, ui.row({ justify = "space_between" }, {
       ui.label({ text = "Total", fontSize = 10, color = "on_surface_variant" }),
       ui.label({ text = formatBytes(d.totalBytes), fontSize = 10 }),
+    }))
+    -- small storage-used progress bar
+    table.insert(rows, ui.column({ width = "100%", height = 4, radius = 2, fill = "outline/0.2" }, {
+      ui.column({ width = string.format("%.1f%%", pct), height = 4, radius = 2, fill = "secondary" }),
     }))
   end
 
@@ -208,7 +213,7 @@ function M.build()
     ui.row({ padding = 12, align = "center", justify = "space_between" }, {
       ui.column({ gap = 2 }, {
         ui.label({ text = "Disk", fontSize = 18, fontWeight = "bold" }),
-        ui.label({ text = "Throughput over 1 minute", fontSize = 11, color = "on_surface_variant" }),
+        ui.label({ text = "Active over time", fontSize = 11, color = "on_surface_variant" }),
       }),
     }),
     ui.row({ flexGrow = 1, gap = 12, padding = { left = 12, right = 12, bottom = 12 }, align = "stretch" }, {
