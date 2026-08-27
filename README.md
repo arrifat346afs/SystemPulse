@@ -19,6 +19,10 @@ Add the `sysmon` widget from the Add-widget picker. Clicking the widget opens th
 | --- | --- | --- | --- |
 | `show_cpu` | `bool` | `true` | Display CPU usage percentage in the bar. |
 | `show_ram` | `bool` | `true` | Display RAM usage percentage in the bar. |
+| `show_gpu` | `bool` | `false` | Display GPU usage percentage in the bar. |
+| `show_disk` | `bool` | `false` | Display Disk usage percentage in the bar. |
+| `show_network` | `bool` | `false` | Display Network usage in the bar. |
+| `panel_background_opacity` | `double` | `1.0` | Panel background translucency (0 transparent → 1 opaque); content stays opaque. Uses `fill = "surface/<alpha>"` so graphs, labels and cards remain fully opaque. Edited under Settings → Plugins (gear icon). |
 
 ## Keybind
 
