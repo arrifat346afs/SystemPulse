@@ -23,6 +23,22 @@ local hasSecondGpu = false
 local refresh = nil
 local M = {}
 
+-- -- TEMP TEST: fake second GPU (remove after testing)
+-- hasNvtop = true
+-- local FAKE_GPU = {
+--   device_name = "AMD Radeon RX 7900 XTX (FAKE)",
+--   gpu_util = "42%",
+--   temp = "55C",
+--   fan_speed = "0%",
+--   power_draw = "12W",
+--   gpu_clock = "2200MHz",
+--   mem_clock = "1800MHz",
+--   mem_used = "2147483648",
+--   mem_total = "34359738368",
+--   encode = "3%",
+--   decode = "7%",
+-- }
+
 function M.attach(fn)
   refresh = fn
   hasNvtop = noctalia.commandExists("nvtop")
@@ -98,7 +114,8 @@ end
 
 function M.tick()
   if not hasNvtop then return end
-  noctalia.runAsync("nvtop -s", onNvtopResult, 5000)
+  -- TEMP TEST: inject fake data instead of calling nvtop (remove after testing)
+  -- pendingNvtop = FAKE_GPU
 
   if pendingNvtop ~= nil then
     local gpu = pendingNvtop
@@ -185,7 +202,7 @@ local function buildStatsPanel()
     table.insert(stats, { label = "Power Draw", value = formatPower(powerDraw) })
   end
   if vramUsedBytes ~= nil and vramTotalBytes ~= nil then
-    table.insert(stats, { label = "Memory Usage", value = formatBytes(vramUsedBytes) .. " / " .. formatBytes(vramTotalBytes) })
+    table.insert(stats, { label = "Memory Usage", value = formatBytes(vramUsedBytes) })
   end
   if memClock ~= nil then
     table.insert(stats, { label = "Memory Clock", value = formatClock(memClock) })
