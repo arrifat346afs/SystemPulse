@@ -154,7 +154,7 @@ local function buildSidebar()
   end
 
   -- Fixed-width column: device cards first, then the app list underneath.
-  return ui.column({ width = 180, gap = 6, fill = "surface_variant/0.4", radius = 10, padding = 6 }, {
+  return ui.column({ width = 180, gap = 6, fill = "surface_variant/0.4", radius = 10, padding = 5 }, {
     -- ui.label({ text = "Devices", fontSize = 14, fontWeight = "bold" }),
     sidebarItem("cpu", "CPU", cpu.getSubtitle and cpu.getSubtitle() or "", cpuVal, cpu),
     sidebarItem("ram", "Memory", ram.getSubtitle and ram.getSubtitle() or "", ramVal, ram),

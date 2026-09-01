@@ -76,8 +76,8 @@ local function buildYLabels()
 end
 
 local function buildGraph()
-  return ui.column({ flexGrow = 1, gap = 4 }, {
-    ui.column({ flexGrow = 1, gap = 4 }, {
+  return ui.column({ flexGrow = 1, gap = 2 }, {
+    ui.column({ flexGrow = 1, gap = 2 }, {
       ui.graph({
         values = { table.unpack(history) },
         color = "tertiary",
